@@ -1,0 +1,63 @@
+version: "3"
+services:
+  nacos1:
+    image: nacos/nacos-server:${NACOS_VERSION}
+    hostname: nacos1
+    container_name: nacos1
+    volumes:
+      - ./logs/nacos1:/home/nacos/logs
+      - ./init.d/custom.properties:/home/nacos/init.d/custom.properties
+    ports:
+      - "8848:8848"
+      - "9848:9848"
+      - "9555:9555"
+    env_file:
+      - ./env/nacos-hostname.env
+    restart: always
+    depends_on:
+      - mysql
+
+  nacos2:
+    image: nacos/nacos-server:${NACOS_VERSION}
+    hostname: nacos2
+    container_name: nacos2
+    volumes:
+      - ./logs/nacos2:/home/nacos/logs
+      - ./init.d/custom.properties:/home/nacos/init.d/custom.properties
+    ports:
+      - "8849:8848"
+      - "9849:9848"
+    env_file:
+      - ./env/nacos-hostname.env
+    restart: always
+    depends_on:
+      - mysql
+
+  nacos3:
+    image: nacos/nacos-server:${NACOS_VERSION}
+    hostname: nacos3
+    container_name: nacos3
+    volumes:
+      - ./logs/nacos3:/home/nacos/logs
+      - ./init.d/custom.properties:/home/nacos/init.d/custom.properties
+    ports:
+      - "8850:8848"
+      - "9850:9848"
+    env_file:
+      - ./env/nacos-hostname.env
+    restart: always
+    depends_on:
+      - mysql
+
+  mysql:
+    image: nacos/nacos-mysql:8.0.16
+    container_name: mysql
+    env_file:
+      - ./env/mysql.env
+    volumes:
+      - ./mysql:/var/lib/mysql
+    security_opt:
+      - seccomp:unconfined
+    ports:
+      - "3306:3306"
+    restart: always
