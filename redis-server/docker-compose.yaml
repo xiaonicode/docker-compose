@@ -1,0 +1,20 @@
+version: "3"
+services:
+  redis-server:
+    image: redis:6.2-alpine
+    container_name: redis-server
+    environment:
+      - TZ=Asia/Shanghai
+      - LANG=en_US.UTF-8
+    command:
+      - redis-server
+      - /usr/local/etc/redis/redis.conf
+      - --bind * -::*
+      - --requirepass 123456
+      - --appendonly no
+    restart: always
+    volumes:
+      - ./data:/data
+      - ./conf:/usr/local/etc/redis
+    ports:
+      - "6379:6379"
