@@ -3,9 +3,6 @@ services:
   redis-server:
     image: redis:6.2-alpine
     container_name: redis-server
-    environment:
-      - TZ=Asia/Shanghai
-      - LANG=en_US.UTF-8
     command:
       - redis-server
       - /usr/local/etc/redis/redis.conf
