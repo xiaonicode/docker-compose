@@ -1,0 +1,73 @@
+version: "3"
+
+networks:
+  wp_network:
+    driver: bridge
+
+services:
+  mysql_service:
+    image: mysql:${MYSQL_VERSION}
+    container_name: mysql_server
+    command:
+      - --user=mysql
+      - --default_authentication_plugin=mysql_native_password
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+    env_file:
+      - ./env/mysql.env
+    volumes:
+      - db_data:/var/lib/mysql
+    security_opt:
+      - seccomp:unconfined
+    restart: always
+    networks:
+      - wp_network
+
+  wp_service:
+    depends_on:
+      - mysql_service
+    image: wordpress:${WP_VERSION}
+    container_name: wp_server
+    env_file:
+      - ./env/wp.env
+    volumes:
+      - wp_data:/var/www/html
+    ports:
+      - "8000:80"
+    restart: always
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost" ]
+      interval: 1m30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - wp_network
+
+  nginx_service:
+    depends_on:
+      - wp_service
+    image: nginx:1.20-alpine
+    container_name: nginx_server
+    volumes:
+      - ./nginx/conf/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/conf/conf.d:/etc/nginx/conf.d
+      - ./nginx/logs:/var/log/nginx
+      - wp_data:/usr/share/nginx/html
+    ports:
+      - "80:80"
+      - "443:443"
+    dns:
+      - 223.5.5.5
+      - 223.6.6.6
+    restart: always
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost/index.php" ]
+      interval: 1m30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - wp_network
+
+volumes:
+  db_data:
+  wp_data:

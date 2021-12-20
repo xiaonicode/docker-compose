@@ -1,8 +1,8 @@
 version: "3"
 services:
-  mysql-server:
+  mysql_service:
     image: mysql:8.0
-    container_name: mysql-server
+    container_name: mysql_server
     env_file:
       - ./env/mysql.env
     ports:

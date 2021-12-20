@@ -1,8 +1,8 @@
 version: "3"
 services:
-  nginx-server:
+  nginx_service:
     image: nginx:1.20-alpine
-    container_name: nginx-server
+    container_name: nginx_server
     ports:
       - "80:80"
     # 自定义 DNS 服务器
