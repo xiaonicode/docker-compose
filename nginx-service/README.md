@@ -26,8 +26,8 @@
 
    ```conf
    server {
-       listen       80;
-       server_name  example.com www.example.com;
+       listen      80;
+       server_name example.com www.example.com;
 
        if ($host = example.com) {
            return 301 https://$host$request_uri;
@@ -45,20 +45,25 @@
 
    ```conf
    server {
-       listen       443 ssl;
-       server_name  example.com;
+       listen      443 ssl;
+       server_name example.com;
 
-       ssl_certificate      /ssl/server.crt; # SSL 证书
-       ssl_certificate_key  /ssl/server.key; # SSL 私钥
+       ssl_certificate     /ssl/server.crt; # SSL 证书
+       ssl_certificate_key /ssl/server.key; # SSL 私钥
 
-       ssl_session_cache    shared:SSL:10m;  # 重用 SSL 会话参数以避免并行和后续连接的 SSL 握手
-       ssl_session_timeout  10m;             # SSL 会话存活时间
+       ssl_session_cache   shared:SSL:10m;  # 重用 SSL 会话参数以避免并行和后续连接的 SSL 握手
+       ssl_session_timeout 10m;             # SSL 会话存活时间
 
        ssl_ciphers  HIGH:!aNULL:!MD5;
-       ssl_prefer_server_ciphers  on;
+       ssl_prefer_server_ciphers on;
 
        location / {
            proxy_pass http://example; # 配置反向代理
+           proxy_set_header Host $host; # 让浏览器地址栏保持原始请求
+           proxy_set_header X-Real-IP $remote_addr; # 获取客户端真实地址
+           proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for; # 继续传输多级代理
+           proxy_set_header X-Forwarded-Proto https; # 解决 HTTP 升级 HTTPS 后，Nginx 反向代理导致静态资源无法访问的问题
+           proxy_set_header Upgrade-Insecure-Requests 1; # 告知浏览器，可以把所属本站的所有 HTTP 连接升级为 HTTPS 连接
        }
    }
    ```
@@ -67,20 +72,25 @@
 
    ```conf
    server {
-       listen       443 ssl;
-       server_name  www.example.com;
+       listen      443 ssl;
+       server_name www.example.com;
 
-       ssl_certificate      /ssl/server.crt;
-       ssl_certificate_key  /ssl/server.key;
+       ssl_certificate     /ssl/server.crt;
+       ssl_certificate_key /ssl/server.key;
 
-       ssl_session_cache    shared:SSL:10m;
-       ssl_session_timeout  10m;
+       ssl_session_cache   shared:SSL:10m;
+       ssl_session_timeout 10m;
 
-       ssl_ciphers  HIGH:!aNULL:!MD5;
-       ssl_prefer_server_ciphers  on;
+       ssl_ciphers HIGH:!aNULL:!MD5;
+       ssl_prefer_server_ciphers on;
 
        location / {
            proxy_pass http://example;
+           proxy_set_header Host $host;
+           proxy_set_header X-Real-IP $remote_addr;
+           proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+           proxy_set_header X-Forwarded-Proto https;
+           proxy_set_header Upgrade-Insecure-Requests 1;
        }
    }
    ```
@@ -156,11 +166,16 @@
 
    ```conf
    server {
-       listen       80;
-       server_name  example.com www.example.com;
+       listen      80;
+       server_name example.com www.example.com;
 
        location / {
            proxy_pass http://example; # 配置反向代理
+           proxy_set_header Host $host;
+           proxy_set_header X-Real-IP $remote_addr;
+           proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+           proxy_set_header X-Forwarded-Proto https;
+           proxy_set_header Upgrade-Insecure-Requests 1;
        }
    }
    ```
@@ -169,11 +184,16 @@
 
    ```conf
    server {
-       listen       80;
-       server_name  www.example.com;
+       listen      80;
+       server_name www.example.com;
 
        location / {
            proxy_pass http://example; # 配置反向代理
+           proxy_set_header Host $host;
+           proxy_set_header X-Real-IP $remote_addr;
+           proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+           proxy_set_header X-Forwarded-Proto https;
+           proxy_set_header Upgrade-Insecure-Requests 1;
        }
    }
    ```
