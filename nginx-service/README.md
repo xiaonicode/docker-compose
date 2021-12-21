@@ -22,14 +22,11 @@
 
 ### 文件准备
 
-1. 新增 `nginx-service/conf/conf.d/example.conf` 配置文件
-
-2. 填入以下内容
+1. 新增 `nginx-service/conf/conf.d/redirect.conf` 配置文件
 
    ```conf
    server {
        listen       80;
-       listen  [::]:80 ipv6only=on;
        server_name  example.com www.example.com;
 
        if ($host = example.com) {
@@ -42,21 +39,48 @@
 
        return 404;
    }
+   ```
 
+2. 新增 `nginx-service/conf/conf.d/example.conf` 配置文件
+
+   ```conf
    server {
-       listen           443 ssl;
-       listen      [::]:443 ssl ipv6only=on;
-       server_name      example.com www.example.com;
+       listen       443 ssl;
+       server_name  example.com;
 
-       keepalive_timeout   70;              # 启用保持连接，以通过一个连接发送多个请求
-       ssl_session_cache   shared:SSL:10m;  # 重用 SSL 会话参数以避免并行和后续连接的 SSL 握手
-       ssl_session_timeout 10m;             # SSL 会话存活时间
+       ssl_certificate      /ssl/server.crt; # SSL 证书
+       ssl_certificate_key  /ssl/server.key; # SSL 私钥
 
-       ssl_certificate     /ssl/server.crt; # SSL 证书
-       ssl_certificate_key /ssl/server.key; # SSL 私钥
+       ssl_session_cache    shared:SSL:10m;  # 重用 SSL 会话参数以避免并行和后续连接的 SSL 握手
+       ssl_session_timeout  10m;             # SSL 会话存活时间
+
+       ssl_ciphers  HIGH:!aNULL:!MD5;
+       ssl_prefer_server_ciphers  on;
 
        location / {
            proxy_pass http://example; # 配置反向代理
+       }
+   }
+   ```
+
+3. 新增 `nginx-service/conf/conf.d/example-www.conf` 配置文件
+
+   ```conf
+   server {
+       listen       443 ssl;
+       server_name  www.example.com;
+
+       ssl_certificate      /ssl/server.crt;
+       ssl_certificate_key  /ssl/server.key;
+
+       ssl_session_cache    shared:SSL:10m;
+       ssl_session_timeout  10m;
+
+       ssl_ciphers  HIGH:!aNULL:!MD5;
+       ssl_prefer_server_ciphers  on;
+
+       location / {
+           proxy_pass http://example;
        }
    }
    ```
@@ -78,13 +102,13 @@
    ```
    > Enter pass phrase for server.key: ← 输入前面创建的密码
    >
-   > Country Name (2 letter code) [XX]:CN ← 国家代号，中国输入CN
+   > Country Name (2 letter code) [XX]:CN ← 国家代号，中国输入 CN
    >
-   > State or Province Name (full name) []:SiChuan ← 省的全名，拼音
+   > State or Province Name (full name) []:Sichuan ← 省的全名，拼音
    >
    > Locality Name (eg, city) [Default City]:Chengdu ← 市的全名，拼音
    >
-   > Organization Name (eg, company) [Default Company Ltd]:Example Corp. ← 公司英文名
+   > Organization Name (eg, company) [Default Company Ltd]: ← 可以不输入
    >
    > Organizational Unit Name (eg, section) []: ← 可以不输入
    >
@@ -130,13 +154,23 @@
 
 1. 新增 `nginx-service/conf/conf.d/example.conf` 配置文件
 
-2. 填入以下内容
+   ```conf
+   server {
+       listen       80;
+       server_name  example.com www.example.com;
+
+       location / {
+           proxy_pass http://example; # 配置反向代理
+       }
+   }
+   ```
+
+2. 新增 `nginx-service/conf/conf.d/example-www.conf` 配置文件
 
    ```conf
    server {
        listen       80;
-       listen  [::]:80 ipv6only=on;
-       server_name  example.com www.example.com;
+       server_name  www.example.com;
 
        location / {
            proxy_pass http://example; # 配置反向代理
@@ -177,7 +211,7 @@
    certbot --nginx
    ```
 
-3. 具体命令行交互过程（存在自定义域名无法被 `DNS` 解析的问题）
+3. 具体命令行交互过程（存在自定义域名无法被 `DNS` 解析的问题，将导致后续教程步骤无法进行）
 
    ```bash
    Saving debug log to /var/log/letsencrypt/letsencrypt.log

@@ -5,6 +5,7 @@ services:
     container_name: nginx_server
     ports:
       - "80:80"
+      - "443:443"
     # 自定义 DNS 服务器
     dns:
       - 223.5.5.5
